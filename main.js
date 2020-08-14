@@ -44,8 +44,52 @@ function animate() {
 
     renderer.render(scene, camera);
 
-    rotateAboutPoint(cubes[1], new THREE.Vector3(5,5,5), new THREE.Vector3(1,0,0), THREE.Math.degToRad(1))
+    // rotateLeft();
+    // rotateBottom();
+    // rotateBack();
+    // rotateCube();
+    rotateXAxis(1);
 };
+
+////#region Demo only functions
+
+// left->right (x)  0-8,    9-18,    19-27     | i+x*9 (i=0->9)
+// bot->top (y)     0,1,2   9,10,11  18,19,20  | {0,1,2}+y*3 + i*9 (i=0->3)
+// back->front (z)  0,9,18  3,12,21  6,15,24   | {0,3,6}+z*3 + i*9 (i=0->3)
+function rotateXAxis(x) {
+    if(x < 0 || x > 2) {
+        throw "Fehler";
+    }
+
+    for (let i = 0; i < 9; i++) {
+        rotateAboutPoint(cubes[i + x*9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(1, 0, 0), THREE.Math.degToRad(1));
+    }
+}
+function rotateLeft() {
+    for (let i = 0; i < 9; i++) {
+        rotateAboutPoint(cubes[i], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
+    }
+}
+function rotateBottom() {
+    for (let i = 0; i < 3; i++) {
+        rotateAboutPoint(cubes[0 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
+        rotateAboutPoint(cubes[1 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
+        rotateAboutPoint(cubes[2 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
+    }
+}
+function rotateBack() {
+    for (let i = 0; i < 3; i++) {
+        rotateAboutPoint(cubes[0 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
+        rotateAboutPoint(cubes[3 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
+        rotateAboutPoint(cubes[6 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
+    }
+}
+function rotateCube() {
+    for (let i = 0; i < cubes.length; i++) {
+        const element = cubes[i];
+        rotateAboutPoint(element, new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
+    }
+}
 
 function createRubixCube() {
     cubes = [];
@@ -79,7 +123,7 @@ function createRubixCube() {
 }
 
 function newFaceMaterial(faceColor) {
-    return new THREE.MeshBasicMaterial({color:faceColor, side: THREE.DoubleSide});
+    return new THREE.MeshBasicMaterial({ color: faceColor, side: THREE.DoubleSide });
 }
 
 function toggleWireframes() {
@@ -97,10 +141,10 @@ function toggleWireframes() {
  * @param {number} theta radian value of rotation
  * @param {boolean} pointIsWorld boolean indicating the point is in world coordinates (default = false)
  */
-function rotateAboutPoint(obj, point, axis, theta, pointIsWorld){
-    pointIsWorld = (pointIsWorld === undefined)? false : pointIsWorld;
+function rotateAboutPoint(obj, point, axis, theta, pointIsWorld) {
+    pointIsWorld = (pointIsWorld === undefined) ? false : pointIsWorld;
 
-    if(pointIsWorld){
+    if (pointIsWorld) {
         obj.parent.localToWorld(obj.position); // compensate for world coordinate
     }
 
@@ -108,7 +152,7 @@ function rotateAboutPoint(obj, point, axis, theta, pointIsWorld){
     obj.position.applyAxisAngle(axis, theta); // rotate the POSITION
     obj.position.add(point); // re-add the offset
 
-    if(pointIsWorld){
+    if (pointIsWorld) {
         obj.parent.worldToLocal(obj.position); // undo world coordinates compensation
     }
 
