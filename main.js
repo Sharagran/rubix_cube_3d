@@ -43,6 +43,8 @@ function animate() {
 
 
     renderer.render(scene, camera);
+
+    rotateAboutPoint(cubes[1], new THREE.Vector3(5,5,5), new THREE.Vector3(1,0,0), THREE.Math.degToRad(1))
 };
 
 function createRubixCube() {
@@ -86,7 +88,34 @@ function toggleWireframes() {
     });
 }
 
-//Keyboard controls
+/**
+ * Rotates an object around a point.
+ * source: https://stackoverflow.com/a/42866733/7264288
+ * @param {THREE.Object3D} obj object (THREE.Object3D or derived)
+ * @param {THREE.Vector3} point point of rotation (THREE.Vector3)
+ * @param {THREE.Vector3} axis axis of rotation (normalized THREE.Vector3)
+ * @param {number} theta radian value of rotation
+ * @param {boolean} pointIsWorld boolean indicating the point is in world coordinates (default = false)
+ */
+function rotateAboutPoint(obj, point, axis, theta, pointIsWorld){
+    pointIsWorld = (pointIsWorld === undefined)? false : pointIsWorld;
+
+    if(pointIsWorld){
+        obj.parent.localToWorld(obj.position); // compensate for world coordinate
+    }
+
+    obj.position.sub(point); // remove the offset
+    obj.position.applyAxisAngle(axis, theta); // rotate the POSITION
+    obj.position.add(point); // re-add the offset
+
+    if(pointIsWorld){
+        obj.parent.worldToLocal(obj.position); // undo world coordinates compensation
+    }
+
+    obj.rotateOnAxis(axis, theta); // rotate the OBJECT
+}
+
+// controls
 document.onkeyup = function (eventArgs) {
     if (eventArgs.keyCode == 32)
         toggleWireframes();

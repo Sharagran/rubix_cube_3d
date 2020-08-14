@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/Sharagran/rubix_cube_3d/issues"
   },
-  "homepage": "https://github.com/Sharagran/rubix_cube_3d#readme"
+  "homepage": "https://github.com/Sharagran/rubix_cube_3d#readme",
+  "dependencies": {
+    "three": "^0.119.1"
+  }
 }
