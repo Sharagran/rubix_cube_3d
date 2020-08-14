@@ -20,6 +20,7 @@ var controls;
 var cubes = [];
 
 renderer.setSize(window.innerWidth, window.innerHeight);
+scene.background = new THREE.Color(0x292a2e);
 document.body.appendChild(renderer.domElement);
 
 setup();
@@ -33,61 +34,55 @@ function setup() {
 
 function animate() {
     requestAnimationFrame(animate);
-
-    // if (cubes) {
-    //     cubes.forEach(cube => {
-    //         cube.rotation.x += 0.01;
-    //         cube.rotation.y += 0.01;
-    //     });
-    // }
-
-
     renderer.render(scene, camera);
 
-    // rotateLeft();
-    // rotateBottom();
-    // rotateBack();
     // rotateCube();
-    rotateXAxis(1);
+    rotateXAxis(0);
 };
 
 ////#region Demo only functions
 
 // left->right (x)  0-8,    9-18,    19-27     | i+x*9 (i=0->9)
 // bot->top (y)     0,1,2   9,10,11  18,19,20  | {0,1,2}+y*3 + i*9 (i=0->3)
-// back->front (z)  0,9,18  3,12,21  6,15,24   | {0,3,6}+z*3 + i*9 (i=0->3)
+// back->front (z)  0,9,18  3,12,21  6,15,24   | {0,3,6}+z + i*9 (i=0->3)
 function rotateXAxis(x) {
-    if(x < 0 || x > 2) {
+    if (x < 0 || x > 2) {
         throw "Fehler";
     }
 
     for (let i = 0; i < 9; i++) {
-        rotateAboutPoint(cubes[i + x*9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(1, 0, 0), THREE.Math.degToRad(1));
+        rotateAboutPoint(cubes[i + x * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(1, 0, 0).multiplyScalar(3), THREE.Math.degToRad(1));
     }
 }
-function rotateLeft() {
-    for (let i = 0; i < 9; i++) {
-        rotateAboutPoint(cubes[i], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
+
+function rotateYAxis(y) {
+    if (y < 0 || y > 2) {
+        throw "Fehler";
     }
-}
-function rotateBottom() {
+
     for (let i = 0; i < 3; i++) {
-        rotateAboutPoint(cubes[0 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
-        rotateAboutPoint(cubes[1 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
-        rotateAboutPoint(cubes[2 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
+        rotateAboutPoint(cubes[0 + y * 3 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
+        rotateAboutPoint(cubes[1 + y * 3 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
+        rotateAboutPoint(cubes[2 + y * 3 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
     }
 }
-function rotateBack() {
+
+function rotateZAxis(z) {
+    if (z < 0 || z > 2) {
+        throw "Fehler";
+    }
+
     for (let i = 0; i < 3; i++) {
-        rotateAboutPoint(cubes[0 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
-        rotateAboutPoint(cubes[3 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
-        rotateAboutPoint(cubes[6 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
+        rotateAboutPoint(cubes[0 + z + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 0, 1), THREE.Math.degToRad(1));
+        rotateAboutPoint(cubes[3 + z + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 0, 1), THREE.Math.degToRad(1));
+        rotateAboutPoint(cubes[6 + z + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 0, 1), THREE.Math.degToRad(1));
     }
 }
+
 function rotateCube() {
     for (let i = 0; i < cubes.length; i++) {
         const element = cubes[i];
-        rotateAboutPoint(element, new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
+        rotateAboutPoint(element, new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), (new THREE.Vector3(1, 0, 0) ).multiplyScalar(3), THREE.Math.degToRad(1));
     }
 }
 
