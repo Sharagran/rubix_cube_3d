@@ -23,6 +23,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 scene.background = new THREE.Color(0x292a2e);
 document.body.appendChild(renderer.domElement);
 
+var animation_que = [];
 setup();
 function setup() {
     camera.position.set(0, 0, 5);
@@ -35,9 +36,19 @@ function setup() {
 function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
+    TWEEN.update();
 
+    for (let i = 0; i < animation_que.length; i++) {
+        const element = animation_que[i];
+        element.f(cubes[0], new THREE.Vector3(1, 0, 0), THREE.Math.degToRad(1));
+        if(element.i == 0) {
+            animation_que.pop();
+        } else {
+            element.i--;
+        }
+    }
     // rotateCube();
-    rotateXAxis(0);
+    // rotateXAxis(0);
 };
 
 ////#region Demo only functions
@@ -118,7 +129,7 @@ function createRubixCube() {
             }
         }
     }
-
+    animation_que = [{f: rotateAroundCenter, i: 89}];
 }
 
 function newFaceMaterial(faceColor) {
@@ -173,4 +184,29 @@ document.onkeyup = function (eventArgs) {
     if (eventArgs.keyCode == 32)
         toggleWireframes();
 }
+// test();
 
+//TODO: remove animation_que & use tween instead
+function test(x) {
+    var test = cubes[0].rotation.x;
+    const tween = new TWEEN.Tween(test)
+        .to(90.00000000000017, 5000)
+        .onUpdate(() => {
+            // Called after tween.js updates 'rotation'.
+            rotateAroundCenter(cubes[0], new THREE.Vector3(1, 0, 0), THREE.Math.degToRad(1));
+            // test = Math.floor(THREE.Math.radToDeg(cubes[0].rotation.x));
+            console.log(`test: ${test} | rotation: ${THREE.Math.radToDeg(cubes[0].rotation.x)}`);
+        }).start();
+    // for (let i = 0; i < 9; i++) {
+    //     let cube = cubes[i + x * 9];
+    //     const rotation = 0;
+    //      const tween = new TWEEN.Tween(rotation)
+    //         .to({x: 90, y: 90, z: 90}, 1000)
+    //         .easing(TWEEN.Easing.Quadratic.Out)
+    //         .onUpdate(() => {
+    //             // Called after tween.js updates 'rotation'.
+    //             rotateAroundCenter(cube, new THREE.Vector3(1, 0, 0), THREE.Math.degToRad(1));
+    //         }).start();
+    // }
+    
+}
