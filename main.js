@@ -36,7 +36,7 @@ function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
 
-    // rotateCube();
+    rotateCube();
     // rotateXAxis(0);
 };
 
@@ -82,7 +82,7 @@ function rotateZAxis(z) {
 function rotateCube() {
     for (let i = 0; i < cubes.length; i++) {
         const element = cubes[i];
-        rotateAboutPoint(element, new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), (new THREE.Vector3(1, 0, 0)).multiplyScalar(3), THREE.Math.degToRad(1));
+            rotateAroundCenter(element, new THREE.Vector3(1, 1, 1).normalize(), THREE.Math.degToRad(1));
     }
 }
 
