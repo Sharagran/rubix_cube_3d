@@ -51,7 +51,7 @@ function rotateXAxis(x) {
     }
 
     for (let i = 0; i < 9; i++) {
-        rotateAboutPoint(cubes[i + x * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(1, 0, 0).multiplyScalar(3), THREE.Math.degToRad(1));
+        rotateAroundCenter(cubes[i + x * 9], new THREE.Vector3(3, 0, 0).normalize(), THREE.Math.degToRad(1));
     }
 }
 
@@ -82,8 +82,12 @@ function rotateZAxis(z) {
 function rotateCube() {
     for (let i = 0; i < cubes.length; i++) {
         const element = cubes[i];
-        rotateAboutPoint(element, new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), (new THREE.Vector3(1, 0, 0) ).multiplyScalar(3), THREE.Math.degToRad(1));
+        rotateAboutPoint(element, new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), (new THREE.Vector3(1, 0, 0)).multiplyScalar(3), THREE.Math.degToRad(1));
     }
+}
+
+function rotateSegment() {
+
 }
 
 function createRubixCube() {
@@ -128,30 +132,40 @@ function toggleWireframes() {
 }
 
 /**
- * Rotates an object around a point.
- * source: https://stackoverflow.com/a/42866733/7264288
+ * Rotates an object around the center.
  * @param {THREE.Object3D} obj object (THREE.Object3D or derived)
- * @param {THREE.Vector3} point point of rotation (THREE.Vector3)
  * @param {THREE.Vector3} axis axis of rotation (normalized THREE.Vector3)
  * @param {number} theta radian value of rotation
- * @param {boolean} pointIsWorld boolean indicating the point is in world coordinates (default = false)
- */
-function rotateAboutPoint(obj, point, axis, theta, pointIsWorld) {
-    pointIsWorld = (pointIsWorld === undefined) ? false : pointIsWorld;
+*/
+function rotateAroundCenter(obj, axis, theta) {
+    /**
+     * Rotates an object around a point.
+     * source: https://stackoverflow.com/a/42866733/7264288
+     * @param {THREE.Object3D} obj object (THREE.Object3D or derived)
+     * @param {THREE.Vector3} point point of rotation (THREE.Vector3)
+     * @param {THREE.Vector3} axis axis of rotation (normalized THREE.Vector3)
+     * @param {number} theta radian value of rotation
+     * @param {boolean} pointIsWorld boolean indicating the point is in world coordinates (default = false)
+    */
+    function rotateAboutPoint(obj, point, axis, theta, pointIsWorld) {
+        pointIsWorld = (pointIsWorld === undefined) ? false : pointIsWorld;
 
-    if (pointIsWorld) {
-        obj.parent.localToWorld(obj.position); // compensate for world coordinate
+        if (pointIsWorld) {
+            obj.parent.localToWorld(obj.position); // compensate for world coordinate
+        }
+
+        obj.position.sub(point); // remove the offset
+        obj.position.applyAxisAngle(axis, theta); // rotate the POSITION
+        obj.position.add(point); // re-add the offset
+
+        if (pointIsWorld) {
+            obj.parent.worldToLocal(obj.position); // undo world coordinates compensation
+        }
+
+        obj.rotateOnAxis(axis, theta); // rotate the OBJECT
     }
 
-    obj.position.sub(point); // remove the offset
-    obj.position.applyAxisAngle(axis, theta); // rotate the POSITION
-    obj.position.add(point); // re-add the offset
-
-    if (pointIsWorld) {
-        obj.parent.worldToLocal(obj.position); // undo world coordinates compensation
-    }
-
-    obj.rotateOnAxis(axis, theta); // rotate the OBJECT
+    return rotateAboutPoint(obj, new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), axis, theta, false);
 }
 
 // controls
@@ -159,3 +173,4 @@ document.onkeyup = function (eventArgs) {
     if (eventArgs.keyCode == 32)
         toggleWireframes();
 }
+
