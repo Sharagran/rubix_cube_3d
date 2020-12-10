@@ -25,10 +25,15 @@ document.body.appendChild(renderer.domElement);
 
 setup();
 function setup() {
-    camera.position.set(0, 0, 5);
+    camera.position.set(0, 0, 10);
     controls = new THREE.OrbitControls(camera); //FIXME: debug only: Requires OBJLoader.js
+    controls.enablePan = false;
 
     createRubixCube();
+    let center = cubes[13];
+    camera.position.set(center.position.x, center.position.y, center.position.z + 10);
+    camera.lookAt(center);
+    controls.update();
     animate();
 }
 
@@ -36,11 +41,10 @@ function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
 
-    rotateCube();
-    // rotateXAxis(0);
+    //rotateCube();
+    rotateXAxis(0);
 };
 
-////#region Demo only functions
 
 // left->right (x)  0-8,    9-18,    19-27     | i+x*9 (i=0->9)
 // bot->top (y)     0,1,2   9,10,11  18,19,20  | {0,1,2}+y*3 + i*9 (i=0->3)
@@ -51,7 +55,7 @@ function rotateXAxis(x) {
     }
 
     for (let i = 0; i < 9; i++) {
-        rotateAroundCenter(cubes[i + x * 9], new THREE.Vector3(3, 0, 0).normalize(), THREE.Math.degToRad(1));
+        rotateAroundCenter(cubes[i + x * 9], new THREE.Vector3(1, 0, 0).normalize(), THREE.Math.degToRad(1));
     }
 }
 
@@ -61,9 +65,9 @@ function rotateYAxis(y) {
     }
 
     for (let i = 0; i < 3; i++) {
-        rotateAboutPoint(cubes[0 + y * 3 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
-        rotateAboutPoint(cubes[1 + y * 3 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
-        rotateAboutPoint(cubes[2 + y * 3 + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 1, 0), THREE.Math.degToRad(1));
+        rotateAroundCenter(cubes[0 + y * 3 + i * 9], new THREE.Vector3(0, 1, 0).normalize(), THREE.Math.degToRad(1));
+        rotateAroundCenter(cubes[1 + y * 3 + i * 9], new THREE.Vector3(0, 1, 0).normalize(), THREE.Math.degToRad(1));
+        rotateAroundCenter(cubes[2 + y * 3 + i * 9], new THREE.Vector3(0, 1, 0).normalize(), THREE.Math.degToRad(1));
     }
 }
 
@@ -73,21 +77,31 @@ function rotateZAxis(z) {
     }
 
     for (let i = 0; i < 3; i++) {
-        rotateAboutPoint(cubes[0 + z + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 0, 1), THREE.Math.degToRad(1));
-        rotateAboutPoint(cubes[3 + z + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 0, 1), THREE.Math.degToRad(1));
-        rotateAboutPoint(cubes[6 + z + i * 9], new THREE.Vector3(1 + GAP_SIZE, 1 + GAP_SIZE, 1 + GAP_SIZE), new THREE.Vector3(0, 0, 1), THREE.Math.degToRad(1));
+        rotateAroundCenter(cubes[0 + z + i * 9], new THREE.Vector3(0, 0, 1).normalize(), THREE.Math.degToRad(1));
+        rotateAroundCenter(cubes[3 + z + i * 9], new THREE.Vector3(0, 0, 1).normalize(), THREE.Math.degToRad(1));
+        rotateAroundCenter(cubes[6 + z + i * 9], new THREE.Vector3(0, 0, 1).normalize(), THREE.Math.degToRad(1));
     }
 }
 
-function rotateCube() {
+function rotateCube() { //FIXME: demo only
     for (let i = 0; i < cubes.length; i++) {
         const element = cubes[i];
-            rotateAroundCenter(element, new THREE.Vector3(1, 1, 1).normalize(), THREE.Math.degToRad(1));
+        rotateAroundCenter(element, new THREE.Vector3(1, 1, 1).normalize(), THREE.Math.degToRad(1));
     }
 }
 
-function rotateSegment() {
-
+function rotateSegment(index, axis) {
+    switch (axis) {
+        case 0:
+            rotateXAxis(index);
+            break;
+        case 1:
+            rotateYAxis(index);
+            break;
+        case 2:
+            rotateZAxis(index);
+            break;
+    }
 }
 
 function createRubixCube() {
