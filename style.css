@@ -1,7 +1,10 @@
-body {
+* {
     margin: 0;
+    padding: 0;
+    border: 0;
 }
 
-canvas {
-    display: block;
-}
+body {
+    overflow: hidden; /* Hide scrollbars */
+    background-color: black;
+  }
