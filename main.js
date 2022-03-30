@@ -49,45 +49,45 @@ function animate() {
     //rotateCube();
     // rotateXAxis(0);
     // rotateYAxis(0);
-    rotateZAxis(0);
+    // rotateZAxis(0);
 };
 
 
 // left->right (x)  0-8,    9-18,    19-27     | i+x*9 (i=0->9)
 // bot->top (y)     0,1,2   9,10,11  18,19,20  | {0,1,2}+y*3 + i*9 (i=0->3)
 // back->front (z)  0,9,18  3,12,21  6,15,24   | {0,3,6}+z + i*9 (i=0->3)
-function rotateXAxis(x) {
+function rotateXAxis(x, deg = 1) {
     if (x < 0 || x > 2) {
         throw "Fehler";
     }
 
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
-            rotateAroundCenter(cubes[x][i][j], new THREE.Vector3(1, 0, 0).normalize(), THREE.Math.degToRad(1));
+            rotateAroundCenter(cubes[x][i][j], new THREE.Vector3(1, 0, 0).normalize(), THREE.Math.degToRad(deg));
         }
     }
 }
 
-function rotateYAxis(y) {
+function rotateYAxis(y, deg = 1) {
     if (y < 0 || y > 2) {
         throw "Fehler";
     }
 
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
-            rotateAroundCenter(cubes[i][y][j], new THREE.Vector3(0, 1, 0).normalize(), THREE.Math.degToRad(1));
+            rotateAroundCenter(cubes[i][y][j], new THREE.Vector3(0, 1, 0).normalize(), THREE.Math.degToRad(deg));
         }
     }
 }
 
-function rotateZAxis(z) {
+function rotateZAxis(z, deg = 1) {
     if (z < 0 || z > 2) {
         throw "Fehler";
     }
 
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
-            rotateAroundCenter(cubes[i][j][z], new THREE.Vector3(0, 0, 1).normalize(), THREE.Math.degToRad(1));
+            rotateAroundCenter(cubes[i][j][z], new THREE.Vector3(0, 0, 1).normalize(), THREE.Math.degToRad(deg));
         }
     }
 }
@@ -152,8 +152,14 @@ function newFaceMaterial(faceColor) {
 }
 
 function toggleWireframes() {
-    cubes.forEach(cube => {
-        cube.material.wireframe = !cube.material.wireframe;
+    cubes.forEach(cubesY => {
+        cubesY.forEach(cubesZ => {
+            cubesZ.forEach(cube => {
+                cube.material.forEach(material => {
+                    material.wireframe = !material.wireframe;
+                });
+            });
+        });
     });
 }
 
@@ -196,8 +202,30 @@ function rotateAroundCenter(obj, axis, theta) {
 
 // controls
 document.onkeyup = function (eventArgs) {
-    if (eventArgs.key == 32)
+    if (eventArgs.code == "Space") {
         toggleWireframes();
+    }
+}
+
+document.onmousedown = function (eventArgs) {
+    eventArgs.preventDefault();
+    
+    var grabPoint = getGrabPoint();
+    console.log(grabPoint);
+}
+
+function getGrabPoint() {
+    var mouse3D = new THREE.Vector3((event.clientX / window.innerWidth) * 2 - 1, -(event.clientY / window.innerHeight) * 2 + 1, 0.5);
+
+    let allCubes = [...cubes[0][0], ...cubes[0][1], ...cubes[0][2], ...cubes[1][0], ...cubes[1][1], ...cubes[1][2], ...cubes[2][0], ...cubes[2][1], ...cubes[2][2]];
+
+    var raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse3D, camera);
+    var intersectingCubes = raycaster.intersectObjects(allCubes);
+
+    var grabPoint = intersectingCubes.reduce((max, cube) => cube.distance > max.distance ? cube : max, { distance: -1 });
+
+    return grabPoint;
 }
 
 // Functions per side
@@ -205,19 +233,23 @@ document.onkeyup = function (eventArgs) {
 function applyToSide(side, f) {
     switch (side) {
         case "front":
-            break;
+            x = 0;
         case "back":
             break;
         case "left":
-            break;
         case "right":
             break;
         case "top":
-            break;
         case "bot":
             break;
         default:
             throw "Invalid side";
+    }
+
+    for (let i = 0; i < 0; i++) {
+        for (let j = 0; j < 0; j++) {
+            cubes[x][y][z].visible = false;
+        }
     }
 
     //X axis
