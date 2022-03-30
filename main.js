@@ -17,6 +17,7 @@ var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHei
 var renderer = new THREE.WebGLRenderer();
 var controls;
 
+// cubes[x][y][z] cubes[red][green][blue]
 var cubes = [];
 
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -30,7 +31,7 @@ function setup() {
     controls.enablePan = false;
 
     createRubixCube();
-    let center = cubes[13];
+    let center = cubes[1][1][1];
     camera.position.set(center.position.x, center.position.y, center.position.z + 10);
     camera.lookAt(center);
     controls.update();
@@ -47,7 +48,8 @@ function animate() {
 
     //rotateCube();
     // rotateXAxis(0);
-    rotateYAxis(0);
+    // rotateYAxis(0);
+    rotateZAxis(0);
 };
 
 
@@ -59,8 +61,10 @@ function rotateXAxis(x) {
         throw "Fehler";
     }
 
-    for (let i = 0; i < 9; i++) {
-        rotateAroundCenter(cubes[i + x * 9], new THREE.Vector3(1, 0, 0).normalize(), THREE.Math.degToRad(1));
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            rotateAroundCenter(cubes[x][i][j], new THREE.Vector3(1, 0, 0).normalize(), THREE.Math.degToRad(1));
+        }
     }
 }
 
@@ -70,9 +74,9 @@ function rotateYAxis(y) {
     }
 
     for (let i = 0; i < 3; i++) {
-        rotateAroundCenter(cubes[0 + y * 3 + i * 9], new THREE.Vector3(0, 1, 0).normalize(), THREE.Math.degToRad(1));
-        rotateAroundCenter(cubes[1 + y * 3 + i * 9], new THREE.Vector3(0, 1, 0).normalize(), THREE.Math.degToRad(1));
-        rotateAroundCenter(cubes[2 + y * 3 + i * 9], new THREE.Vector3(0, 1, 0).normalize(), THREE.Math.degToRad(1));
+        for (let j = 0; j < 3; j++) {
+            rotateAroundCenter(cubes[i][y][j], new THREE.Vector3(0, 1, 0).normalize(), THREE.Math.degToRad(1));
+        }
     }
 }
 
@@ -82,9 +86,9 @@ function rotateZAxis(z) {
     }
 
     for (let i = 0; i < 3; i++) {
-        rotateAroundCenter(cubes[0 + z + i * 9], new THREE.Vector3(0, 0, 1).normalize(), THREE.Math.degToRad(1));
-        rotateAroundCenter(cubes[3 + z + i * 9], new THREE.Vector3(0, 0, 1).normalize(), THREE.Math.degToRad(1));
-        rotateAroundCenter(cubes[6 + z + i * 9], new THREE.Vector3(0, 0, 1).normalize(), THREE.Math.degToRad(1));
+        for (let j = 0; j < 3; j++) {
+            rotateAroundCenter(cubes[i][j][z], new THREE.Vector3(0, 0, 1).normalize(), THREE.Math.degToRad(1));
+        }
     }
 }
 
@@ -110,33 +114,37 @@ function rotateSegment(index, axis) {
 }
 
 function createRubixCube() {
-    cubes = [];
+    xCubes = [];
 
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-            for (let k = 0; k < 3; k++) {
+    for (let x = 0; x < 3; x++) {
+        var yCubes = [];
+        for (let y = 0; y < 3; y++) {
+            var zCubes = [];
+            for (let z = 0; z < 3; z++) {
                 var geometry = new THREE.BoxGeometry();
                 var materials = [
-                    i == 2 ? newFaceMaterial(0x009b48) : newFaceMaterial(GAP_COLOR),  //right
-                    i == 0 ? newFaceMaterial(0xffffff) : newFaceMaterial(GAP_COLOR),  //left 
-                    j == 2 ? newFaceMaterial(0xb71234) : newFaceMaterial(GAP_COLOR),  //top
-                    j == 0 ? newFaceMaterial(0xffd500) : newFaceMaterial(GAP_COLOR),  //bot
-                    k == 2 ? newFaceMaterial(0x0046ad) : newFaceMaterial(GAP_COLOR),  //front
-                    k == 0 ? newFaceMaterial(0xff5800) : newFaceMaterial(GAP_COLOR)   //back
+                    x == 2 ? newFaceMaterial(0x009b48) : newFaceMaterial(GAP_COLOR),  //right
+                    x == 0 ? newFaceMaterial(0xffffff) : newFaceMaterial(GAP_COLOR),  //left 
+                    y == 2 ? newFaceMaterial(0xb71234) : newFaceMaterial(GAP_COLOR),  //top
+                    y == 0 ? newFaceMaterial(0xffd500) : newFaceMaterial(GAP_COLOR),  //bot
+                    z == 2 ? newFaceMaterial(0x0046ad) : newFaceMaterial(GAP_COLOR),  //front
+                    z == 0 ? newFaceMaterial(0xff5800) : newFaceMaterial(GAP_COLOR)   //back
                 ];
 
                 cube = new THREE.Mesh(geometry, materials);
                 scene.add(cube);
 
-                //i = left->right (x)
-                //j = bot->top (y)
-                //k = back->front (z)
-                var x = i, y = j, z = k;
-                cube.position.set(x + GAP_SIZE * i, y + GAP_SIZE * j, z + GAP_SIZE * k);
-                cubes.push(cube);
+                // left->right (x)
+                // bot->top (y)
+                // back->front (z)
+                cube.position.set(x + GAP_SIZE * x, y + GAP_SIZE * y, z + GAP_SIZE * z);
+                zCubes.push(cube);
             }
+            yCubes.push(zCubes);
         }
+        xCubes.push(yCubes);
     }
+    cubes = xCubes;
 }
 
 function newFaceMaterial(faceColor) {
