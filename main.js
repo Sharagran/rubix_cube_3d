@@ -34,6 +34,10 @@ function setup() {
     camera.position.set(center.position.x, center.position.y, center.position.z + 10);
     camera.lookAt(center);
     controls.update();
+
+    // helper
+    var axesHelper = new THREE.AxesHelper(5);
+    scene.add(axesHelper);
     animate();
 }
 
@@ -42,7 +46,8 @@ function animate() {
     renderer.render(scene, camera);
 
     //rotateCube();
-    rotateXAxis(0);
+    // rotateXAxis(0);
+    rotateYAxis(0);
 };
 
 
@@ -185,4 +190,42 @@ function rotateAroundCenter(obj, axis, theta) {
 document.onkeyup = function (eventArgs) {
     if (eventArgs.key == 32)
         toggleWireframes();
+}
+
+// Functions per side
+
+function applyToSide(side, f) {
+    switch (side) {
+        case "front":
+            break;
+        case "back":
+            break;
+        case "left":
+            break;
+        case "right":
+            break;
+        case "top":
+            break;
+        case "bot":
+            break;
+        default:
+            throw "Invalid side";
+    }
+
+    //X axis
+    for (let i = 0; i < 9; i++) {
+        cubes[i + x * 9].visible = false;
+    }
+    //Y axis
+    for (let i = 0; i < 3; i++) {
+        cubes[0 + y * 3 + i * 9].visible = false;
+        cubes[1 + y * 3 + i * 9].visible = false;
+        cubes[2 + y * 3 + i * 9].visible = false;
+    }
+    //Z axis
+    for (let i = 0; i < 3; i++) {
+        cubes[0 + z + i * 9].visible = false;
+        cubes[3 + z + i * 9].visible = false;
+        cubes[6 + z + i * 9].visible = false;
+    }
 }
