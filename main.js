@@ -183,6 +183,6 @@ function rotateAroundCenter(obj, axis, theta) {
 
 // controls
 document.onkeyup = function (eventArgs) {
-    if (eventArgs.keyCode == 32)
+    if (eventArgs.key == 32)
         toggleWireframes();
 }
