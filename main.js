@@ -1,4 +1,10 @@
+
+
+
 // constants
+/**
+ * @deprecated unused
+ */
 const CUBE_FACES = {
     right: 0,
     left: 1,
@@ -207,15 +213,23 @@ document.onkeyup = function (eventArgs) {
     }
 }
 
+var mouseGrab;
 document.onmousedown = function (eventArgs) {
     eventArgs.preventDefault();
     
-    var grabPoint = getGrabPoint();
-    console.log(grabPoint);
+    mouseGrab = getGrabPoint(eventArgs);
+    console.log(mouseGrab);
 }
 
-function getGrabPoint() {
-    var mouse3D = new THREE.Vector3((event.clientX / window.innerWidth) * 2 - 1, -(event.clientY / window.innerHeight) * 2 + 1, 0.5);
+document.onmouseup = function (eventArgs) {
+    var mouse3D = new THREE.Vector3((eventArgs.clientX / window.innerWidth) * 2 - 1, -(eventArgs.clientY / window.innerHeight) * 2 + 1, 0.5);
+    // get mouse movement and new pos since onmousedown
+    var movementVector = new THREE.Vector3().subVectors(mouse3D, mouseGrab.point)
+    console.log(movementVector);
+}
+
+function getGrabPoint(eventArgs) {
+    var mouse3D = new THREE.Vector3((eventArgs.clientX / window.innerWidth) * 2 - 1, -(eventArgs.clientY / window.innerHeight) * 2 + 1, 0.5);
 
     let allCubes = [...cubes[0][0], ...cubes[0][1], ...cubes[0][2], ...cubes[1][0], ...cubes[1][1], ...cubes[1][2], ...cubes[2][0], ...cubes[2][1], ...cubes[2][2]];
 
@@ -223,9 +237,9 @@ function getGrabPoint() {
     raycaster.setFromCamera(mouse3D, camera);
     var intersectingCubes = raycaster.intersectObjects(allCubes);
 
-    var grabPoint = intersectingCubes.reduce((max, cube) => cube.distance > max.distance ? cube : max, { distance: -1 });
+    var mouseGrab = intersectingCubes.reduce((max, cube) => cube.distance > max.distance ? cube : max, { distance: -1 });
 
-    return grabPoint;
+    return mouseGrab;
 }
 
 // Functions per side
