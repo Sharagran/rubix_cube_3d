@@ -226,6 +226,7 @@ document.onmouseup = function (eventArgs) {
     // get mouse movement and new pos since onmousedown
     var movementVector = new THREE.Vector3().subVectors(mouse3D, mouseGrab.point)
     console.log(movementVector);
+    console.log(getRotationDirection(movementVector));
 }
 
 function getGrabPoint(eventArgs) {
@@ -240,6 +241,36 @@ function getGrabPoint(eventArgs) {
     var mouseGrab = intersectingCubes.reduce((max, cube) => cube.distance > max.distance ? cube : max, { distance: -1 });
 
     return mouseGrab;
+}
+
+// FIXME: totally not working
+function getRotationDirection(vector) {
+    // X
+    if (vector.x >= vector.y && vector.x >= vector.z ) {
+        if (vector.x >= 0) {
+            return "right"
+        } else {
+            return "left"
+        }
+    }
+
+    // Y
+    if (vector.y >= vector.x && vector.y >= vector.z ) {
+        if (vector.y >= 0) {
+            return "up"
+        } else {
+            return "down"
+        }
+    }
+
+    // Z
+    if (vector.z >= vector.x && vector.z >= vector.y ) {
+        if (vector.z >= 0) {
+            return "+z"
+        } else {
+            return "-z"
+        }
+    }
 }
 
 // Functions per side
