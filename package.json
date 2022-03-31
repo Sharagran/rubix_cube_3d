@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Sharagran/rubix_cube_3d#readme",
   "dependencies": {
+    "dat.gui": "^0.7.9",
     "three": "^0.119.1"
   }
 }

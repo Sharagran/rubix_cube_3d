@@ -1,6 +1,3 @@
-
-
-
 // constants
 /**
  * @deprecated unused
@@ -22,6 +19,7 @@ var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 var renderer = new THREE.WebGLRenderer();
 var controls;
+var helper = {};
 
 // cubes[x][y][z] cubes[red][green][blue]
 var cubes = [];
@@ -31,6 +29,7 @@ scene.background = new THREE.Color(0x292a2e);
 document.body.appendChild(renderer.domElement);
 
 setup();
+setupGUI();
 function setup() {
     camera.position.set(0, 0, 10);
     controls = new THREE.OrbitControls(camera); //FIXME: debug only: Requires OBJLoader.js
@@ -43,9 +42,32 @@ function setup() {
     controls.update();
 
     // helper
-    var axesHelper = new THREE.AxesHelper(5);
-    scene.add(axesHelper);
+    helper.axesHelper = new THREE.AxesHelper(5);
+    scene.add(helper.axesHelper);
     animate();
+}
+
+function setupGUI() {
+    const gui = new dat.GUI();
+    const debugFolder = gui.addFolder('Debug Controls')
+    const DebugControls = {
+        get wireframe() {
+            return cubes[0][0][0].material[0].wireframe;
+        },
+        set wireframe(value) {
+            setWireframes(value);
+        },
+        get axesHelper() {
+            return helper.axesHelper.visible;
+        },
+        set axesHelper(value) {
+            helper.axesHelper.visible = value;
+        }
+    }
+    debugFolder.add(DebugControls, 'wireframe')
+    debugFolder.add(DebugControls, 'axesHelper')
+    debugFolder.open()
+    // gui.close();
 }
 
 function animate() {
@@ -53,7 +75,7 @@ function animate() {
     renderer.render(scene, camera);
 
     //rotateCube();
-    // rotateXAxis(0);
+    rotateXAxis(0);
     // rotateYAxis(0);
     // rotateZAxis(0);
 };
@@ -157,12 +179,12 @@ function newFaceMaterial(faceColor) {
     return new THREE.MeshBasicMaterial({ color: faceColor, side: THREE.DoubleSide });
 }
 
-function toggleWireframes() {
+function setWireframes(value) {
     cubes.forEach(cubesY => {
         cubesY.forEach(cubesZ => {
             cubesZ.forEach(cube => {
                 cube.material.forEach(material => {
-                    material.wireframe = !material.wireframe;
+                    material.wireframe = value;
                 });
             });
         });
@@ -207,31 +229,27 @@ function rotateAroundCenter(obj, axis, theta) {
 }
 
 // controls
-document.onkeyup = function (eventArgs) {
-    if (eventArgs.code == "Space") {
-        toggleWireframes();
-    }
-}
-
 var mouseGrab;
 document.onmousedown = function (eventArgs) {
     eventArgs.preventDefault();
-    
-    mouseGrab = getGrabPoint(eventArgs);
+
+    getGrabPoint(eventArgs);
     console.log(mouseGrab);
 }
 
 document.onmouseup = function (eventArgs) {
-    var mouse3D = new THREE.Vector3((eventArgs.clientX / window.innerWidth) * 2 - 1, -(eventArgs.clientY / window.innerHeight) * 2 + 1, 0.5);
+    var mouse3D = new THREE.Vector2((eventArgs.clientX / window.innerWidth) * 2 - 1, -(eventArgs.clientY / window.innerHeight) * 2 + 1);
     // get mouse movement and new pos since onmousedown
     // https://stackoverflow.com/questions/27486949/three-js-change-vector-length-by-absolute-value
-    var movementVector = new THREE.Vector3().subVectors(mouse3D, mouseGrab.point)
+    var movementVector = new THREE.Vector2().subVectors(mouse3D, mouseGrab.point);
+    var raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse3D, camera);
     console.log(movementVector);
     console.log(getRotationDirection(movementVector));
 }
 
 function getGrabPoint(eventArgs) {
-    var mouse3D = new THREE.Vector3((eventArgs.clientX / window.innerWidth) * 2 - 1, -(eventArgs.clientY / window.innerHeight) * 2 + 1, 0.5);
+    var mouse3D = new THREE.Vector2((eventArgs.clientX / window.innerWidth) * 2 - 1, -(eventArgs.clientY / window.innerHeight) * 2 + 1);
 
     let allCubes = [...cubes[0][0], ...cubes[0][1], ...cubes[0][2], ...cubes[1][0], ...cubes[1][1], ...cubes[1][2], ...cubes[2][0], ...cubes[2][1], ...cubes[2][2]];
 
@@ -239,9 +257,8 @@ function getGrabPoint(eventArgs) {
     raycaster.setFromCamera(mouse3D, camera);
     var intersectingCubes = raycaster.intersectObjects(allCubes);
 
-    var mouseGrab = intersectingCubes.reduce((max, cube) => cube.distance > max.distance ? cube : max, { distance: -1 });
-
-    return mouseGrab;
+    mouseGrab = intersectingCubes.reduce((max, cube) => cube.distance > max.distance ? cube : max, { distance: -1 });
+    mouseGrab.point = mouse3D;
 }
 
 // FIXME: totally not working
@@ -251,16 +268,14 @@ function getGrabPoint(eventArgs) {
 // was ist wenn man von oben auf den cube guckt? erkenne um welche achse gedreht werden muss anhand des vectors & direction durch mouse on screen movement
 function getRotationDirection(vector) {
     // X
-    if (vector.x >= vector.y && vector.x >= vector.z ) {
+    if (Math.abs(vector.x) >= Math.abs(vector.y)) {
         if (vector.x >= 0) {
             return "right"
         } else {
             return "left"
         }
-    }
-
-    // Y
-    if (vector.y >= vector.x && vector.y >= vector.z ) {
+    } else {
+        // Y
         if (vector.y >= 0) {
             return "up"
         } else {
@@ -268,14 +283,6 @@ function getRotationDirection(vector) {
         }
     }
 
-    // Z
-    if (vector.z >= vector.x && vector.z >= vector.y ) {
-        if (vector.z >= 0) {
-            return "+z"
-        } else {
-            return "-z"
-        }
-    }
 }
 
 // Functions per side
