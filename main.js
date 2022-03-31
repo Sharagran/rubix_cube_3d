@@ -224,6 +224,7 @@ document.onmousedown = function (eventArgs) {
 document.onmouseup = function (eventArgs) {
     var mouse3D = new THREE.Vector3((eventArgs.clientX / window.innerWidth) * 2 - 1, -(eventArgs.clientY / window.innerHeight) * 2 + 1, 0.5);
     // get mouse movement and new pos since onmousedown
+    // https://stackoverflow.com/questions/27486949/three-js-change-vector-length-by-absolute-value
     var movementVector = new THREE.Vector3().subVectors(mouse3D, mouseGrab.point)
     console.log(movementVector);
     console.log(getRotationDirection(movementVector));
@@ -244,6 +245,10 @@ function getGrabPoint(eventArgs) {
 }
 
 // FIXME: totally not working
+// aktuell werden achsen überprüft, also an welche achse wird die mouse bewegt
+// wichtig ist jedoch screen positioning da blickrichtung auf dem cube egal ist
+// (maus movement nach rechts wäre +x aus einer perspektive und -x aus der Perspektive gegenüber)
+// was ist wenn man von oben auf den cube guckt? erkenne um welche achse gedreht werden muss anhand des vectors & direction durch mouse on screen movement
 function getRotationDirection(vector) {
     // X
     if (vector.x >= vector.y && vector.x >= vector.z ) {
