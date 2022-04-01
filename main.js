@@ -44,6 +44,8 @@ function setup() {
     // helper
     helper.axesHelper = new THREE.AxesHelper(5);
     scene.add(helper.axesHelper);
+    helper.gridHelper = new THREE.GridHelper(10, 10);
+    scene.add(helper.gridHelper);
     animate();
 }
 
@@ -57,15 +59,35 @@ function setupGUI() {
         set wireframe(value) {
             setWireframes(value);
         },
+        get cubes() {
+            return cubes[0][0][0].visible;
+        },
+        set cubes(value) {
+            cubes.forEach(cubesY => {
+                cubesY.forEach(cubesZ => {
+                    cubesZ.forEach(cube => {
+                        cube.visible = value;
+                    });
+                });
+            });
+        },
         get axesHelper() {
             return helper.axesHelper.visible;
         },
         set axesHelper(value) {
             helper.axesHelper.visible = value;
+        },
+        get gridHelper() {
+            return helper.gridHelper.visible;
+        },
+        set gridHelper(value) {
+            helper.gridHelper.visible = value;
         }
     }
     debugFolder.add(DebugControls, 'wireframe')
     debugFolder.add(DebugControls, 'axesHelper')
+    debugFolder.add(DebugControls, 'gridHelper')
+    debugFolder.add(DebugControls, 'cubes')
     debugFolder.open()
     // gui.close();
 }
@@ -325,4 +347,16 @@ function applyToSide(side, f) {
         cubes[3 + z + i * 9].visible = false;
         cubes[6 + z + i * 9].visible = false;
     }
+}
+
+// resize canvas on window resize
+window.addEventListener( 'resize', onWindowResize, false );
+
+function onWindowResize(){
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize( window.innerWidth, window.innerHeight );
+
 }
