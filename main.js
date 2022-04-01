@@ -11,6 +11,13 @@ const CUBE_FACES = {
     back: 5
 };
 
+const DIRECTION = {
+    left: 0,
+    right: 1,
+    up: 2,
+    down: 3
+}
+
 const GAP_SIZE = 0.1;
 const GAP_COLOR = 0x0;
 
@@ -96,8 +103,8 @@ function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
 
-    //rotateCube();
-    rotateXAxis(0);
+    // rotateCube();
+    // rotateXAxis(0);
     // rotateYAxis(0);
     // rotateZAxis(0);
 };
@@ -256,18 +263,60 @@ document.onmousedown = function (eventArgs) {
     eventArgs.preventDefault();
 
     getGrabPoint(eventArgs);
-    console.log(mouseGrab);
 }
 
 document.onmouseup = function (eventArgs) {
+    if (mouseGrab.distance == -1 || eventArgs.button != 2) {
+        return;
+    }
     var mouse3D = new THREE.Vector2((eventArgs.clientX / window.innerWidth) * 2 - 1, -(eventArgs.clientY / window.innerHeight) * 2 + 1);
     // get mouse movement and new pos since onmousedown
     // https://stackoverflow.com/questions/27486949/three-js-change-vector-length-by-absolute-value
     var movementVector = new THREE.Vector2().subVectors(mouse3D, mouseGrab.point);
     var raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse3D, camera);
-    console.log(movementVector);
-    console.log(getRotationDirection(movementVector));
+
+    var direction = getRotationDirection(movementVector);
+    var normalizedFaceIndex = Math.trunc(mouseGrab.faceIndex / 12 * 6);
+
+    var axis;
+    switch (normalizedFaceIndex) {
+        case 0:
+        case 1:
+            if (direction == DIRECTION.up || direction == DIRECTION.down) {
+                axis = "z";
+            } else {
+                axis = "y";
+            }
+            break;
+        case 2:
+        case 3:
+            if (direction == DIRECTION.up || direction == DIRECTION.down) {
+                axis = "x";
+            } else {
+                axis = "z";
+            }
+            break;
+        case 4:
+        case 5:
+            if (direction == DIRECTION.up || direction == DIRECTION.down) {
+                axis = "x";
+            } else {
+                axis = "y";
+            }
+            break;
+    }
+    var c = getCubesOnAxis(mouseGrab.object, axis);
+
+    var rotation = direction == DIRECTION.up || direction == DIRECTION.right ? -45 : 45;
+    axis = axis == "x" ? new THREE.Vector3(1, 0, 0) : axis == "y" ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(0, 0, 1);
+
+    c.forEach(cube => {
+        // cube.visible = false;
+        rotateAroundCenter(cube, axis, rotation * Math.PI / 2);
+    });
+
+
 }
 
 function getGrabPoint(eventArgs) {
@@ -279,7 +328,7 @@ function getGrabPoint(eventArgs) {
     raycaster.setFromCamera(mouse3D, camera);
     var intersectingCubes = raycaster.intersectObjects(allCubes);
 
-    mouseGrab = intersectingCubes.reduce((max, cube) => cube.distance > max.distance ? cube : max, { distance: -1 });
+    mouseGrab = intersectingCubes.reduce((a, b) => a.distance > b.distance ? b : a, intersectingCubes[0] || { distance: -1 });
     mouseGrab.point = mouse3D;
 }
 
@@ -292,16 +341,16 @@ function getRotationDirection(vector) {
     // X
     if (Math.abs(vector.x) >= Math.abs(vector.y)) {
         if (vector.x >= 0) {
-            return "right"
+            return DIRECTION.right;
         } else {
-            return "left"
+            return DIRECTION.left;
         }
     } else {
         // Y
         if (vector.y >= 0) {
-            return "up"
+            return DIRECTION.up;
         } else {
-            return "down"
+            return DIRECTION.down;
         }
     }
 
@@ -349,14 +398,29 @@ function applyToSide(side, f) {
     }
 }
 
-// resize canvas on window resize
-window.addEventListener( 'resize', onWindowResize, false );
+function getCubesOnAxis(refCube, axis) {
+    var cubesOnAxis = [];
+    var axisAlignValue = refCube.position[axis];
+    cubes.forEach(function (row) {
+        row.forEach(function (col) {
+            col.forEach(function (cube) {
+                if (cube.position[axis] == axisAlignValue) {
+                    cubesOnAxis.push(cube);
+                }
+            });
+        });
+    });
+    return cubesOnAxis;
+}
 
-function onWindowResize(){
+// resize canvas on window resize
+window.addEventListener('resize', onWindowResize, false);
+
+function onWindowResize() {
 
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
 
-    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
 }
